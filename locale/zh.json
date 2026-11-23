@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "SVN 工作树",
+    "description": "查看 SVN 工作副本改动、创建工作树分支并提交选中文件。",
+    "detail": "docs/usage.md"
+  }
+}

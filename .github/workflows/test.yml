@@ -1,0 +1,21 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  host-and-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install svn
+        run: sudo apt-get update && sudo apt-get install -y subversion
+      - name: Host routes against a throwaway repository
+        run: node test/host.test.mjs
+      - name: Client module mounts and renders
+        run: node test/client.test.mjs

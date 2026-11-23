@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "SVN worktrees",
+    "description": "Review SVN working copy changes, create branch worktrees and commit selected files.",
+    "detail": "docs/usage.md"
+  }
+}
