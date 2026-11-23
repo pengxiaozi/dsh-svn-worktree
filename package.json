@@ -1,6 +1,6 @@
 {
   "name": "dsh-svn-worktree",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SVN branch worktrees and a change panel for DeepSeek Harness",
   "type": "module",
   "keywords": [
@@ -14,7 +14,7 @@
     "sidebar"
   ],
   "license": "MIT",
-  "author": "pengxiaozi <pengxiaozi96@hotmail.com>",
+  "author": "pengxiaozi",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pengxiaozi/dsh-svn-worktree.git"
@@ -44,7 +44,8 @@
     "icon.svg",
     "README.md",
     "README.zh.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "test": "node test/host.test.mjs && node test/client.test.mjs",

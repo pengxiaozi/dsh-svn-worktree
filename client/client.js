@@ -1,9 +1,8 @@
 /**
- * Client half of `dsh-svn-worktree`.
+ * `dsh-svn-worktree` 的客户端实现。
  *
- * Registers a right-sidebar tab ("SVN 变更") plus a header button that opens
- * it. Everything it renders comes from the host routes mounted by lib/index.js;
- * this file never runs svn itself.
+ * 注册右侧栏页签（「SVN 变更」）以及打开它的会话头部按钮。
+ * 面板显示的所有数据都来自 lib/index.js 注册的宿主路由，本文件自己从不执行 svn。
  */
 window.__ModuleLoader__.load({
   id: 'dsh-svn-worktree',
@@ -17,14 +16,14 @@ window.__ModuleLoader__.load({
     const { useCallback, useEffect, useMemo, useRef, useState } = React
 
     const NS = 'dsh-svn-worktree'
-    /** Sidebar tab implementation id; also the slot key of body and title. */
+    /** 侧栏页签实现 id；同时也是正文与标题插槽的 key。 */
     const TAB_ID = NS
-    /** Discriminator used when opening the tab. */
+    /** 打开页签时使用的类型标识。 */
     const TAB_KIND = 'svn-worktree'
     const ROUTE = '/dsh-svn-worktree'
 
     /* ------------------------------------------------------------------ */
-    /* styles                                                              */
+    /* 样式                                                               */
     /* ------------------------------------------------------------------ */
 
     const CSS = `
@@ -84,7 +83,7 @@ window.__ModuleLoader__.load({
 `
 
     let styleEl = null
-    /** Inject the stylesheet once per window. */
+    /** 每个窗口只注入一次样式表。 */
     function ensureStyles() {
       if (styleEl !== null && styleEl.isConnected) return
       styleEl = document.createElement('style')
@@ -94,7 +93,7 @@ window.__ModuleLoader__.load({
     }
 
     /* ------------------------------------------------------------------ */
-    /* locale                                                              */
+    /* 多语言文案                                                          */
     /* ------------------------------------------------------------------ */
 
     const zh = {
@@ -170,9 +169,9 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Build a translator with a local dictionary fallback.
-     * @param source - dictionary from the slot props, if any.
-     * @returns a translate function.
+     * 构造带本地字典兜底的翻译函数。
+     * @param source - 来自插槽 props 的字典（如果有）。
+     * @returns 翻译函数。
      */
     function translator(source) {
       const supplied = typeof source === 'function' ? source : null
@@ -188,14 +187,14 @@ window.__ModuleLoader__.load({
     }
 
     /* ------------------------------------------------------------------ */
-    /* transport                                                           */
+    /* 与宿主通信                                                          */
     /* ------------------------------------------------------------------ */
 
     /**
-     * Call one host route.
-     * @param path - route below the plugin prefix.
-     * @param options - query values, HTTP method and JSON body.
-     * @returns the parsed payload; throws when `ok` is false.
+     * 调用一个宿主路由。
+     * @param path - 插件前缀下的路由路径。
+     * @param options - 查询参数、HTTP 方法与 JSON 请求体。
+     * @returns 解析后的数据；`ok` 为 false 时抛错。
      */
     async function request(path, options = {}) {
       const query = new URLSearchParams()
@@ -224,10 +223,10 @@ window.__ModuleLoader__.load({
     }
 
     /* ------------------------------------------------------------------ */
-    /* helpers                                                             */
+    /* 辅助函数                                                            */
     /* ------------------------------------------------------------------ */
 
-    /** Status tag display: CSS class and short label. */
+    /** 状态标记的显示信息：CSS 类名与简短标签。 */
     const STATUS = {
       modified: { cls: 'mod', label: 'M' },
       added: { cls: 'add', label: 'A' },
@@ -242,9 +241,9 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Describe one change entry for the badge.
-     * @param file - change record from the host.
-     * @returns class and short label.
+     * 把一条变更记录转换成徽标所需的信息。
+     * @param file - 宿主返回的变更记录。
+     * @returns CSS 类名与简短标签。
      */
     function describe(file) {
       if (file.conflicted) return STATUS.conflicted
@@ -255,9 +254,9 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Split a unified diff into lines, each tagged for colouring.
-     * @param text - diff text.
-     * @returns array of `{ cls, text }`.
+     * 把统一差异文本拆成行，并给每行打上着色标记。
+     * @param text - 差异文本。
+     * @returns `{ cls, text }` 数组。
      */
     function diffLines(text) {
       if (text === undefined || text === null || text === '') return []
@@ -271,12 +270,12 @@ window.__ModuleLoader__.load({
     }
 
     /* ------------------------------------------------------------------ */
-    /* panel                                                               */
+    /* 面板                                                                */
     /* ------------------------------------------------------------------ */
 
     /**
-     * The right-sidebar panel body.
-     * @param props - slot props plus injected services.
+     * 右侧栏面板主体。
+     * @param props - 插槽 props 以及注入的服务。
      */
     function SvnPanel(props) {
       const sessionId = props.sessionId
@@ -340,9 +339,9 @@ window.__ModuleLoader__.load({
       useEffect(() => { setNotice('') }, [notice])
 
       /**
-       * Run one mutating action and re-read the working copy.
-       * @param label - busy label.
-       * @param action - the work to do.
+       * 执行一次会改动工作副本的操作，然后重新读取。
+       * @param label - 运行中显示的文案。
+       * @param action - 要执行的操作。
        */
       const act = useCallback(async (label, action) => {
         setBusy(label)
@@ -364,8 +363,8 @@ window.__ModuleLoader__.load({
       }, [reload])
 
       /**
-       * Show the diff of one path.
-       * @param path - repository-relative path.
+       * 显示某个路径的差异。
+       * @param path - 相对仓库根的路径。
        */
       const preview = useCallback(async (path) => {
         if (activePath === path) { setActivePath(null); setDiff(null); return }
@@ -617,8 +616,8 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Compact tab title.
-     * @param props - slot props.
+     * 精简的页签标题。
+     * @param props - 插槽 props。
      */
     function SvnTabTitle(props) {
       const t = translator(props.t)
@@ -629,8 +628,8 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Conversation header button that opens the panel.
-     * @param props - slot props plus the injected opener.
+     * 打开面板的会话头部按钮。
+     * @param props - 插槽 props 以及注入的打开函数。
      */
     function SvnHeaderButton(props) {
       const t = translator(props.t)
@@ -644,12 +643,12 @@ window.__ModuleLoader__.load({
     }
 
     /* ------------------------------------------------------------------ */
-    /* mounting                                                            */
+    /* 挂载                                                                */
     /* ------------------------------------------------------------------ */
 
     /**
-     * Register the tab, its slots and the header entry.
-     * @param ctx - client plugin context.
+     * 注册页签、它的插槽以及头部入口。
+     * @param ctx - 客户端插件上下文。
      */
     function apply(ctx) {
       ensureStyles()

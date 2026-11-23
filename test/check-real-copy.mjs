@@ -1,17 +1,21 @@
 /**
- * Read-only smoke check against a real, existing SVN working copy: mounts the
- * host half against a fake Cordis context whose Session lives in that checkout
- * and reads state/changes/diff without modifying anything.
+ * 针对真实存在的 SVN 工作副本做只读冒烟检查：把宿主侧挂到伪造的 Cordis
+ * 上下文上（会话就位于该检出目录中），只读 state/changes/diff，不做任何修改。
  *
- * Run with: node test/check-real-copy.mjs [path-to-working-copy]
+ * 运行方式：node test/check-real-copy.mjs [工作副本路径]
  */
 import assert from 'node:assert/strict'
 import { Readable } from 'node:stream'
 
 import { apply } from '../lib/index.js'
 
-const SVN = process.env.SVN_COMMAND || (process.platform === 'win32' ? 'D:/devsoftware/svn-cli/bin/svn.exe' : 'svn')
-const target = process.argv[2] || 'D:\\devsoftware\\php\\phpstudy_pro\\WWW\\cjzj'
+// svn 默认取 PATH 里的可执行文件；目标工作副本必须由命令行参数给出。
+const SVN = process.env.SVN_COMMAND || 'svn'
+const target = process.argv[2]
+if (!target) {
+  console.error('用法：node test/check-real-copy.mjs <工作副本路径>')
+  process.exit(1)
+}
 const sessionId = 'session-real-copy'
 
 const routes = new Map()
@@ -46,10 +50,10 @@ const ctx = {
 }
 
 /**
- * Invoke one captured route with a GET query string.
- * @param path - route path.
- * @param query - query parameters.
- * @returns parsed JSON response.
+ * 用 GET 查询串调用一个已捕获的路由。
+ * @param path - 路由路径。
+ * @param query - 查询参数。
+ * @returns 解析后的 JSON 响应。
  */
 async function read(path, query = {}) {
   const handler = routes.get(path)

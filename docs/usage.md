@@ -11,7 +11,7 @@
   - id: svn-worktree
     name: 'dsh-svn-worktree'
     config:
-      svnCommand: 'D:/devsoftware/svn-cli/bin/svn.exe'
+      svnCommand: 'C:/path/to/svn.exe'
   ```
 
 ## 面板里能做什么

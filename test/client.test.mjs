@@ -1,13 +1,12 @@
 /**
- * Client-half smoke test: loads `client/client.js` the way the browser module
- * loader does, mounts it against a fake Cordis client context, and renders the
- * tab body, tab title and header button with a minimal stand-in for React.
+ * 客户端冒烟测试：按照浏览器模块加载器的方式载入 `client/client.js`，
+ * 把它挂到伪造的 Cordis 客户端上下文上，再用极简的 React 替身渲染
+ * 页签正文、页签标题与会话头部按钮。
  *
- * It proves the module loads, registers its tab type, slots and header entry,
- * and that every component renders once without throwing. It does not replace
- * looking at the panel in the running app.
+ * 它证明模块能被载入、页签类型/插槽/头部入口都注册成功，并且每个组件都能
+ * 渲染一次而不抛错。它不能替代在真实应用中查看面板。
  *
- * Run with: node test/client.test.mjs
+ * 运行方式：node test/client.test.mjs
  */
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -17,7 +16,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const here = dirname(fileURLToPath(import.meta.url))
 const source = readFileSync(join(here, '..', 'client', 'client.js'), 'utf8')
 
-/* --- a very small React stand-in ---------------------------------------- */
+/* --- 极简的 React 替身 -------------------------------------------------- */
 let stateCursor = 0
 const react = {
   createElement(type, props, ...children) {
@@ -39,7 +38,7 @@ const requireModule = (id) => {
   throw new Error('unexpected module request: ' + id)
 }
 
-/* --- a document good enough for the style injection --------------------- */
+/* --- 足以支撑样式注入的 document 替身 ---------------------------------- */
 const appended = []
 globalThis.document = {
   querySelector: () => null,
@@ -47,7 +46,7 @@ globalThis.document = {
   head: { appendChild: (node) => appended.push(node) },
 }
 
-/* --- load the module through the real loader contract ------------------- */
+/* --- 按真实加载器契约载入模块 ------------------------------------------ */
 let loaded
 globalThis.window = {
   __ModuleLoader__: {
@@ -61,7 +60,7 @@ const module = loaded.factory(requireModule)
 assert.equal(module.name, 'dsh-svn-worktree')
 assert.deepEqual(module.inject, ['slots', 'locale', 'sidebarRightTabs', 'sidebarRight'])
 
-/* --- mount against a fake client context -------------------------------- */
+/* --- 挂载到伪造的客户端上下文上 ---------------------------------------- */
 const registered = { tabs: [], slots: [], dictionaries: [] }
 const context = {
   get(service) {
@@ -92,7 +91,7 @@ assert.deepEqual(registered.slots.map((slot) => slot.name), [
   'conversation.session.header.utilities',
 ])
 
-/* --- render every component once --------------------------------------- */
+/* --- 把每个组件各渲染一次 ---------------------------------------------- */
 const components = Object.fromEntries(registered.slots.map((slot) => [slot.name, slot.off.component]))
 const header = components['conversation.session.header.utilities']
 const tabBody = components['sidebar.right.pane.tab']
