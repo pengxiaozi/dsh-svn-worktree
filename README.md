@@ -1,63 +1,78 @@
 # dsh-svn-worktree
 
-SVN version of the change panel and worktree feature for DeepSeek Harness: a **SVN changes** tab in the right sidebar, a `create_svn_worktree` tool for the model, and branch worktrees backed by `svn copy` + `svn checkout`.
+DeepSeek Harness 的 SVN 版「变更 + 工作树」插件：右侧栏多一个 **SVN 变更** 面板，模型多一个 `create_svn_worktree` 工具，工作树用 `svn copy` + `svn checkout` 实现。
 
-Chinese documentation: [README.zh.md](README.zh.md) · Usage details: [docs/usage.md](docs/usage.md)
+[English](README.en.md) · 完整用法见 [docs/usage.md](docs/usage.md) · 更新记录见 [CHANGELOG.md](CHANGELOG.md)
 
-## What it does
+## 能力
 
-- Lists the working copy changes of the Session directory (`svn status`), with per-file unified diffs.
-- Commits the selected files with a message of your own (`svn commit -F <log> --targets <list>`).
-- Adds unversioned files, reverts changes, updates the working copy.
-- Creates worktrees: copies a branch from `trunk` (or the given base) to `<repos-root>/branches/<name>` and checks it out under `<project>/.agents/worktrees/<name>`, optionally switching the Session directory to it.
+- 列出会话工作目录的改动（`svn status`），点击任一条查看该文件的 unified diff。
+- 勾选文件、自己写提交日志后提交（`svn commit -F <日志> --targets <清单>`），中文日志可以直接用。
+- 把未纳入版本控制的文件加入版本库、撤销改动、更新工作副本。
+- 创建工作树：从 `trunk`（或指定 base）复制到 `<仓库根>/branches/<name>`，再检出到 `<项目根>/.agents/worktrees/<name>`，可选把会话工作目录切过去。
 
-## Install
+## 安装
 
 ```text
-plugin_manager install_bundle  target: <path to this directory>
+plugin_manager install_bundle  target: <本目录绝对路径>
 ```
 
-Or straight from GitHub / npm:
+也可以直接引用 GitHub / npm 上的包：
 
 ```text
 plugin_manager install_bundle  target: github:pengxiaozi/dsh-svn-worktree
 plugin_manager install_bundle  target: dsh-svn-worktree
 ```
 
-Then open the **SVN** button in a Session header, or pick **SVN changes** in the right sidebar tab list. Plugin page metadata lives in `locale/en.json` and `locale/zh.json`.
+也可以走图形界面：插件 → 添加插件 → 填 `dsh-svn-worktree@0.1.2` 或包目录路径。
 
-## Requirements
+装好后在会话标题栏点 **SVN** 按钮，或到右侧栏标签里选「SVN 变更」。插件页展示的标题与描述在 `locale/en.json`、`locale/zh.json`。
 
-- The Session working directory must be an SVN working copy.
-- An `svn` executable on `PATH`; set `svnCommand` in the plugin config when it is elsewhere.
+## 前提
 
-## Files
+- 会话工作目录本身是 SVN 工作副本（目录里有 `.svn`），否则面板只会提示「当前目录不是 SVN 工作副本」。
+- `PATH` 里有 `svn` 可执行文件；找不到时在插件配置里把 `svnCommand` 指到绝对路径：
 
-| Path | Role |
+  ```yaml
+  - id: svn-worktree
+    name: 'dsh-svn-worktree'
+    config:
+      svnCommand: 'C:/path/to/svn.exe'
+  ```
+
+## 文件
+
+| 路径 | 作用 |
 | --- | --- |
-| `lib/index.js` | Host: `svn` runner, workspace detection, routes under `/dsh-svn-worktree`, `create_svn_worktree` tool |
-| `client/client.js` | Web: right-sidebar tab, tab title, Session header button |
-| `locale/*.json` | Plugins page title, description and detail link |
-| `docs/usage.md` | Behaviour, worktree semantics, configuration |
-| `test/host.test.mjs` | End-to-end host test against a throwaway local SVN repository |
-| `test/client.test.mjs` | Mounts the client module with a stand-in React to prove registration and rendering |
-| `test/check-real-copy.mjs` | Read-only check against a real working copy: `node test/check-real-copy.mjs <path>` |
+| `lib/index.js` | 宿主：svn 调用、工作副本探测、`/dsh-svn-worktree` 路由、`create_svn_worktree` 工具 |
+| `client/client.js` | 前端：右侧栏面板、标签标题、会话标题栏按钮 |
+| `locale/*.json` | 插件页标题、描述、说明文档链接 |
+| `docs/usage.md` | 行为、工作树语义、配置项 |
+| `test/host.test.mjs` | 用临时本地 SVN 仓库跑宿主端到端测试 |
+| `test/client.test.mjs` | 用极简 React 替身挂载前端模块，确认注册与渲染不抛异常 |
+| `test/check-real-copy.mjs` | 对真实工作副本做只读体检：`node test/check-real-copy.mjs <路径>` |
 
-## Test
+## 测试
 
 ```bash
 node test/host.test.mjs
 node test/client.test.mjs
-node test/check-real-copy.mjs D:\path\to\working-copy
+node test/check-real-copy.mjs /path/to/working-copy
 ```
 
-`host.test.mjs` creates a local repository with `svnadmin` and covers both checkout layouts: `trunk` checked out on its own, and the repository root checked out with `trunk`/`branches` as subdirectories, which is the more common production shape. It then drives every route: state, changes, diff, add, commit, worktree create/enter/remove and the refusals around them.
+`host.test.mjs` 用 `svnadmin` 建临时仓库，覆盖两种检出形态：只检出 `trunk`，以及检出整个仓库根（`trunk`／`branches` 是子目录，生产上更常见）。然后把每条路由都跑一遍：state、changes、diff、add、commit、工作树创建／进入／删除，以及各种应当失败的边界情况。
 
-`client.test.mjs` loads `client/client.js` through the browser module contract and renders the tab body, tab title and header button with a stand-in React. It only proves nothing throws; the panel still has to be looked at in the app.
+`client.test.mjs` 按浏览器的模块加载契约载入 `client/client.js`，用替身 React 渲染标签体、标签标题和标题栏按钮，只保证不抛异常；面板的真实观感仍需在应用里点开看。
 
-## Boundaries
+`test/check-real-copy.mjs` 需要你显式给出工作副本路径，只走只读路由，不改动任何文件。
 
-- Read-only towards the repository except for the explicit add/revert/update/commit actions you trigger.
-- No change-request provider: SVN has no pull-request concept.
-- Conflicts block commits; resolve them with `svn resolve` outside the panel.
-- Removing a worktree never deletes the remote branch.
+## 边界
+
+- 除你主动触发的 add / revert / update / commit 外，对仓库只读。
+- 不注册变更请求提供者：SVN 没有 PR 概念，面板只做本地变更与分支工作树。
+- 有冲突时禁止提交，需在面板外用 `svn resolve` 解决。
+- 删除工作树只删本地检出，不会删除远端分支。
+
+## 许可
+
+MIT

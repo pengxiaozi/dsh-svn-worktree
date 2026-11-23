@@ -1,5 +1,10 @@
 # 更新日志
 
+## 0.1.2
+
+- `README.md` 改为中文，成为 GitHub 与 npm 页面上的默认说明；英文说明移到 `README.en.md`，两份顶部互相链接。
+- 删除 `README.zh.md`（内容并入 `README.md`），安装与测试段落补充了图形界面安装方式和跨平台路径示例。
+
 ## 0.1.1
 
 - 全部源码注释改写为中文文档注释（`lib/index.js`、`client/client.js`、`test/*.mjs`），统一 JSDoc 写法，说明每个函数的参数与返回值。

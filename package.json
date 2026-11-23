@@ -1,6 +1,6 @@
 {
   "name": "dsh-svn-worktree",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "SVN branch worktrees and a change panel for DeepSeek Harness",
   "type": "module",
   "keywords": [
@@ -43,9 +43,9 @@
     "cordis.patch.yml",
     "icon.svg",
     "README.md",
-    "README.zh.md",
     "LICENSE",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "README.en.md"
   ],
   "scripts": {
     "test": "node test/host.test.mjs && node test/client.test.mjs",
